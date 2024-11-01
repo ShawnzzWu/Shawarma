@@ -2,7 +2,8 @@
 import pyautogui as pygui
 import keyboard as kb
 import pygame as pg
-import sys
+import datetime
+import time
 import asyncio
 
 class console:
@@ -66,6 +67,8 @@ class Actions:
         self.items['add cucumber'] = self.add_cucumber
         self.items['add sauce1'] = self.add_sauce1
         self.items['end sir'] = self.end_sir
+        self.tasks = []
+        self.shawarma_on_oven = 0
         self.c = console()
         asyncio.run(self.run())
 
@@ -75,20 +78,20 @@ class Actions:
         while True:
             if kb.is_pressed('w'):
                 print('Do shawarma')
-                await self.do_shawarma()
+                self.do_shawarma()
             elif kb.is_pressed('s'):
                 print('supply! sir')
-                await self.supply_sir()
+                self.supply_sir()
             elif kb.is_pressed('c'):
                 print('Chopping!!!')
-                await self.chop_meat()
+                self.chop_meat()
             elif kb.is_pressed('f'):
                 print('More chips!')
-                await self.cut_potatoes()
+                self.cut_potatoes()
 
             elif kb.is_pressed('m'):
                 print('CHACHIN')
-                await self.cash_in()
+                self.cash_in()
             elif kb.is_pressed('esc'):
                 break
 
@@ -106,15 +109,21 @@ class Actions:
                                 words = self.c.font.render(i, True, self.c.color_black)
                             self.c.win.blit(words, loc)
                             pg.display.flip()
-
+            self.finish_task()
             # for t in tasks:
             #     asyncio.run(t)
             # tasks = []
 
-    async def terminate(self):
-        return
+    def finish_task(self):
+        for i, (t, interval, act, arg) in enumerate(self.tasks):
+            if (datetime.datetime.now() - t).seconds >= interval:
+                if arg != None:
+                    act(arg)
+                else:
+                    act()
+                self.tasks.pop(i)
 
-    async def supply_sir(self):
+    def supply_sir(self):
         print(self.region)
         # location = pygui.locateCenterOnScreen(self.items['sir'], grayscale=True, confidence=0.85)
         x = self.region.left + 0.15 * self.region.width
@@ -125,7 +134,7 @@ class Actions:
         pygui.mouseDown()
         pygui.mouseUp()
 
-        await asyncio.sleep(0.7)
+        time.sleep(0.7)
 
         if self.c.button_info['橙汁']:
             pygui.moveTo(x + self.region.width / 15 , y + self.region.height / 7)
@@ -133,7 +142,6 @@ class Actions:
             for i in range(4):
                 pygui.mouseDown()
                 pygui.mouseUp()
-
 
         pygui.moveTo(x + self.region.width / 15, y + self.region.height/80)
 
@@ -147,27 +155,28 @@ class Actions:
             pygui.mouseDown()
             pygui.mouseUp()
 
-
-
         pygui.moveTo(x, y)
         pygui.mouseDown()
         pygui.mouseUp()
 
-    async def cut_potatoes(self):
+    def cut_potatoes(self):
 
         if not self.c.button_info['削土豆']:
             cutTime = 6
         else:
             cutTime = 3
-        friedTime = 14
+        friedTime = 15
 
         x = self.region.left + 0.9 * self.region.width
         y = self.region.top + 0.6 * self.region.height
 
         pygui.moveTo(x, y)
         pygui.mouseDown()
-        await asyncio.sleep(cutTime)
+        time.sleep(cutTime)
         pygui.mouseUp()
+
+        self.tasks.append((datetime.datetime.now(), friedTime, self.fried_potatoes, None))
+        # self.fried_potatoes()
 
         # if self.start:
         #     await self.supply_sir()
@@ -176,15 +185,18 @@ class Actions:
         #     await asyncio.sleep(friedTime - 7)
         #     self.start = False
         # else:
-        await asyncio.sleep(friedTime)
+
+    def fried_potatoes(self):
+
+        x = self.region.left + 0.9 * self.region.width
+        y = self.region.top + 0.6 * self.region.height
 
         pygui.moveTo(x - self.region.width * 0.1, y - 0.1 * self.region.height)
 
         pygui.mouseDown()
         pygui.mouseUp()
 
-
-    async def chop_meat(self):
+    def chop_meat(self):
             x = self.region.left + 0.2 * self.region.width
             y = self.region.top + 0.65 * self.region.height
 
@@ -198,37 +210,62 @@ class Actions:
 
             pygui.mouseUp()
 
-    async def do_shawarma(self):
-            x_wrap = self.region.left + 0.3 * self.region.width
-            y_wrap = self.region.top + 0.8 * self.region.height
+    def do_shawarma(self):
+        x_wrap = self.region.left + 0.3 * self.region.width
+        y_wrap = self.region.top + 0.8 * self.region.height
 
-            pygui.moveTo(x_wrap, y_wrap)
+        pygui.moveTo(x_wrap, y_wrap)
+        pygui.mouseDown()
+        pygui.mouseUp()
+
+        x_ingred = self.region.left + 0.25 * self.region.width
+        y_ingred = self.region.top + 0.65 * self.region.height
+        time.sleep(0.5)
+
+        for i in range(4):
+            pygui.moveTo(x_ingred + i * 0.085 * self.region.width, y_ingred)
+            for i in range(3):
+                pygui.mouseDown()
+                pygui.mouseUp()
+
+        pygui.moveTo(x_wrap + 0.2 * self.region.width, y_wrap + 0.05 * self.region.height)
+        pygui.mouseDown()
+        pygui.moveTo(x_wrap + 0.2 * self.region.width, y_wrap - 0.06 * self.region.height, duration=0.3)
+        pygui.mouseUp()
+
+        if self.c.button_info['烤架1']:
+            self.tasks.append((datetime.datetime.now(), 7.5, self.wrap_shawarma, self.shawarma_on_oven))
+            self.shawarma_on_oven += 1
+        else:
+            self.wrap_shawarma()
+        #     time.sleep(5)
+        #     pygui.moveTo(x_wrap + 0.4 * self.region.width, y_wrap)
+        #     pygui.mouseDown()
+        #     pygui.mouseUp()
+        #     time.sleep(0.3)
+        #     pygui.moveTo(x_wrap + 0.1 * self.region.width, y_wrap)
+        #     pygui.mouseDown()
+        #     pygui.moveTo(x_wrap + 0.3 * self.region.width, y_wrap - 0.05 * self.region.height, duration=0.3)
+        #     pygui.mouseUp()
+    def wrap_shawarma(self, loc):
+        x_wrap = self.region.left + 0.3 * self.region.width
+        y_wrap = self.region.top + 0.8 * self.region.height
+        print(loc, y_wrap - (loc-1) * 0.05 * self.region.height)
+        if self.c.button_info['烤架1']:
+            pygui.moveTo(x_wrap + 0.4 * self.region.width, y_wrap + (loc-1) * 0.075 * self.region.height)
             pygui.mouseDown()
+            pygui.moveTo(x_wrap + 0.3 * self.region.width, y_wrap + (loc - 1) * 0.075 * self.region.height)
             pygui.mouseUp()
+            self.shawarma_on_oven -= 1
+            time.sleep(0.5)
 
-            x_ingred = self.region.left + 0.25 * self.region.width
-            y_ingred = self.region.top + 0.65 * self.region.height
-            await asyncio.sleep(0.5)
-
-            for i in range(4):
-                pygui.moveTo(x_ingred + i * 0.085 * self.region.width, y_ingred)
-                for i in range(3):
-                    pygui.mouseDown()
-                    pygui.mouseUp()
+        pygui.moveTo(x_wrap + 0.1 * self.region.width, y_wrap)
+        pygui.mouseDown()
+        pygui.moveTo(x_wrap + 0.3 * self.region.width, y_wrap - 0.05 * self.region.height, duration=0.3)
+        pygui.mouseUp()
 
 
-
-            pygui.moveTo(x_wrap + 0.2 * self.region.width, y_wrap + 0.05 * self.region.height)
-            pygui.mouseDown()
-            pygui.moveTo(x_wrap + 0.2 * self.region.width, y_wrap - 0.06 * self.region.height, duration=0.3)
-            pygui.mouseUp()
-
-            pygui.moveTo(x_wrap + 0.1 * self.region.width, y_wrap)
-            pygui.mouseDown()
-            pygui.moveTo(x_wrap + 0.3 * self.region.width, y_wrap - 0.05 * self.region.height, duration=0.3)
-            pygui.mouseUp()
-
-    async def cash_in(self):
+    def cash_in(self):
             x = self.region.left + 0.3 * self.region.width
             y = self.region.top + 0.5 * self.region.height
 
