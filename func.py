@@ -15,9 +15,12 @@ class console:
     color_lblue = (157, 189, 241)
     color_dorange = (211, 143, 93)
     color_dkorange = (180, 150, 60)
+    colors = [color_black, color_maize, color_lblue, color_dkorange]
     font = pg.font.SysFont("SimHei", 48)
     # font_l = pg.font.Font('D:\\tech\python\\game\\shaweima\\font\\ZhouZiSongTi7000Zi-2.otf', 40)
-    titles = ['橙汁', '可乐', '削土豆', '烤架1', '薯条机1', '双刃刀', '配料1', '石榴糖浆1', '克比', '小偷', '培训']
+    titles = ['橙汁', '可乐', '削土豆', '烤架', '薯条机', '双刃刀', '配料', '石榴糖浆', '克比', '小偷', '培训']
+    tools_lv = {'橙汁': 2, '可乐':3, '削土豆':3, '烤架':4, '薯条机':3,
+                '双刃刀':3, '配料':3, '石榴糖浆':3, '克比':2, '小偷':2, '培训':2}
 
     def __init__(self):
         self.win = pg.display.set_mode((800, 600))
@@ -128,11 +131,8 @@ class Actions:
                         loc = self.c.button_loc[i]
 
                         if loc.x <= mouse[0] <= loc.x + 45 *len(i) and loc.y <= mouse[1] <= loc.y + 40:
-                            self.c.button_info[i] = not self.c.button_info[i]
-                            if self.c.button_info[i]:
-                                words = self.c.font.render(i, True, self.c.color_maize)
-                            else:
-                                words = self.c.font.render(i, True, self.c.color_black)
+                            self.c.button_info[i] = (self.c.button_info[i] + 1) % self.c.tools_lv[i]
+                            words = self.c.font.render(i, True, self.c.colors[self.c.button_info[i]])
                             self.c.win.blit(words, loc)
                             pg.display.flip()
                     # print(self.c.button_info)
@@ -313,7 +313,7 @@ class Actions:
 
 
     def supply_cola(self):
-        if self.c.button_info['可乐']:
+        if self.c.button_info['可乐'] > 0:
             x = self.region.left + 0.8 * self.region.width
             y = self.region.top + 0.9 * self.region.height
 
@@ -335,14 +335,15 @@ class Actions:
 
     def cut_potatoes(self):
 
-        if not self.c.button_info['削土豆']:
+        if self.c.button_info['削土豆'] == 0:
             cutTime = 6
-        else:
+        elif self.c.button_info['削土豆'] == 1:
             cutTime = 3
-        if self.c.button_info['薯条机1']:
-            friedTime = 10
-        else:
+
+        if self.c.button_info['薯条机'] == 0:
             friedTime = 15
+        elif self.c.button_info['薯条机'] == 1:
+            friedTime = 10
 
         x = self.region.left + 0.9 * self.region.width
         y = self.region.top + 0.6 * self.region.height
@@ -371,8 +372,8 @@ class Actions:
             pygui.moveTo(x, y)
             pygui.mouseDown()
 
-            if self.c.button_info['双刃刀']:
-                for i in range(6):
+            if self.c.button_info['双刃刀'] == 1:
+                for i in range(5):
                     pygui.moveTo(x + 0.05 * self.region.width, y - 0.4 * self.region.height, duration = 0.5)
 
                     pygui.moveTo(x + 0.05 * self.region.width, y - 0.09 * self.region.height, duration = 0.5)
@@ -396,10 +397,12 @@ class Actions:
         y_ingred = self.region.top + 0.65 * self.region.height
         time.sleep(0.5)
 
-        if self.c.button_info['配料1']:
+        if self.c.button_info['配料'] == 1:
             add_t = 2
-        else:
+        elif self.c.button_info['配料'] == 0:
             add_t = 3
+        elif self.c.button_info['配料'] == 2:
+            add_t = 1
 
         for i in range(4):
             pygui.moveTo(x_ingred + i * 0.085 * self.region.width, y_ingred)
@@ -407,10 +410,15 @@ class Actions:
                 pygui.mouseDown()
                 pygui.mouseUp()
 
-        if self.c.button_info['石榴糖浆1']:
+        if self.c.button_info['石榴糖浆'] == 1:
             pygui.moveTo(self.region.left + 0.15 * self.region.width, y_wrap)
             pygui.mouseDown()
             pygui.moveTo(x_wrap + 0.2 * self.region.width, y_wrap, duration=0.15)
+            pygui.mouseUp()
+            time.sleep(1)
+        elif self.c.button_info['石榴糖浆'] == 2:
+            pygui.moveTo(self.region.left + 0.15 * self.region.width, y_wrap)
+            pygui.mouseDown()
             pygui.mouseUp()
             time.sleep(1)
 
@@ -419,29 +427,32 @@ class Actions:
         pygui.moveTo(x_wrap + 0.2 * self.region.width, y_wrap - 0.06 * self.region.height, duration=0.3)
         pygui.mouseUp()
 
-        if self.c.button_info['烤架1']:
+        if self.c.button_info['烤架'] == 1:
             self.tasks.append((datetime.datetime.now(), 7.5, self.wrap_shawarma, self.shawarma_on_oven))
             self.shawarma_on_oven += 1
-        else:
+        elif self.c.button_info['烤架'] == 2:
+            self.tasks.append((datetime.datetime.now(), 3.5, self.wrap_shawarma, self.shawarma_on_oven))
+            self.shawarma_on_oven += 1
+        elif self.c.button_info['烤架'] == 0:
             self.wrap_shawarma()
 
 
 
     def wrap_shawarma(self, loc):
         x_wrap = self.region.left + 0.3 * self.region.width
-        y_wrap = self.region.top + 0.8 * self.region.height
+        y_wrap = self.region.top + 0.77 * self.region.height
 
-        if self.c.button_info['烤架1']:
-            pygui.moveTo(x_wrap + 0.4 * self.region.width, y_wrap + (loc-1) * 0.075 * self.region.height)
+        if self.c.button_info['烤架'] > 0:
+            pygui.moveTo(x_wrap + 0.4 * self.region.width, y_wrap + loc * 0.075 * self.region.height)
             pygui.mouseDown()
-            pygui.moveTo(x_wrap + 0.3 * self.region.width, y_wrap + (loc - 1) * 0.075 * self.region.height)
+            pygui.moveTo(x_wrap + 0.3 * self.region.width, y_wrap + loc * 0.075 * self.region.height)
             pygui.mouseUp()
             self.shawarma_on_oven -= 1
             time.sleep(0.5)
 
         pygui.moveTo(x_wrap + 0.1 * self.region.width, y_wrap)
         pygui.mouseDown()
-        pygui.moveTo(x_wrap + 0.3 * self.region.width, y_wrap + (loc - 1) * 0.075 * self.region.height, duration=0.2)
+        pygui.moveTo(x_wrap + 0.3 * self.region.width, y_wrap + loc * 0.075 * self.region.height, duration=0.25)
         pygui.mouseUp()
 
 
