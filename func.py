@@ -122,7 +122,6 @@ class Actions:
                 print('CHACHIN')
                 self.cash_in()
             elif kb.is_pressed('esc'):
-                break
 
             for event in pg.event.get():
                 if event.type == pg.MOUSEBUTTONUP:
