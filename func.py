@@ -60,6 +60,7 @@ class Actions:
         self.add_cucumber = self.path + 'add cucumber.png'
         self.add_sauce1 = self.path + 'add sauce1.png'
         self.end_sir = self.path + 'end sir.png'
+        self.kobe = self.path + 'kobe.png'
         self.items = dict()
         self.items['sir'] = self.sir
         self.items['cucumber'] = self.cucumber
@@ -67,6 +68,8 @@ class Actions:
         self.items['add cucumber'] = self.add_cucumber
         self.items['add sauce1'] = self.add_sauce1
         self.items['end sir'] = self.end_sir
+        self.items['kobe'] = self.kobe
+        self.kobes = 0
         self.tasks = []
         self.shawarma_on_oven = 0
         self.c = console()
@@ -88,7 +91,7 @@ class Actions:
             elif kb.is_pressed('f'):
                 print('More chips!')
                 self.cut_potatoes()
-            elif kb.is_pressed('o'):
+            elif kb.is_pressed('o') and self.c.button_info['橙汁']:
                 x = self.region.left + 0.15 * self.region.width
                 y = self.region.top + 0.5 * self.region.height
 
@@ -101,27 +104,18 @@ class Actions:
                 pygui.moveTo(x, y)
                 pygui.mouseDown()
                 pygui.mouseUp()
-            elif kb.is_pressed('k'):
-                x = self.region.left + 0.15 * self.region.width
-                y = self.region.top + 0.5 * self.region.height
+            elif kb.is_pressed('k') and self.c.button_info['克比']:
+                self.give_kobe()
 
-                pygui.moveTo(x, y)
-                pygui.mouseDown()
-                pygui.mouseUp()
-                time.sleep(0.7)
-                self.supply_kobe()
-                pygui.moveTo(x, y)
-                pygui.mouseDown()
-                pygui.mouseUp()
+            elif kb.is_pressed(']') and self.c.button_info['可乐']:
 
-
-            elif kb.is_pressed(']'):
                 self.cola()
 
             elif kb.is_pressed('m'):
                 print('CHACHIN')
                 self.cash_in()
             elif kb.is_pressed('esc'):
+                break
 
             for event in pg.event.get():
                 if event.type == pg.MOUSEBUTTONUP:
@@ -138,10 +132,9 @@ class Actions:
                             self.c.win.blit(words, loc)
                             pg.display.flip()
                     # print(self.c.button_info)
+
             self.finish_task()
-            # for t in tasks:
-            #     asyncio.run(t)
-            # tasks = []
+
 
     def finish_task(self):
         for i, (t, interval, act, arg) in enumerate(self.tasks):
@@ -167,8 +160,8 @@ class Actions:
         if self.c.button_info['橙汁']:
             self.supply_orange()
 
-        if self.c.button_info['克比']:
-            self.supply_kobe()
+        # if self.c.button_info['克比']:
+        #     self.supply_kobe()
 
         pygui.moveTo(x + self.region.width / 15, y + self.region.height/80)
 
@@ -186,13 +179,43 @@ class Actions:
         pygui.mouseDown()
         pygui.mouseUp()
 
+    def give_kobe(self):
+        item = self.items['kobe']
+
+        try:
+            if self.kobes <= 0:
+                self.supply_kobe()
+            while self.kobes > 0:
+                region = pygui.locateCenterOnScreen(item, grayscale=False, confidence=0.96)
+
+                x = self.region.left + 0.6 * self.region.width
+                y = self.region.top + 0.6 * self.region.height
+                pygui.moveTo(x, y)
+                pygui.mouseDown()
+                pygui.moveTo(region.x, region.y, duration=0.3)
+                pygui.mouseUp()
+                self.kobes -= 1
+                pygui.moveTo(self.region.left + 0.1 * self.region.width, self.region.top + 0.1 * self.region.height)
+        except:
+            return
+
     def supply_kobe(self):
         x = self.region.left + 0.15 * self.region.width
         y = self.region.top + 0.5 * self.region.height
+
+        pygui.moveTo(x, y)
+        pygui.mouseDown()
+        pygui.mouseUp()
+        time.sleep(0.85)
+
         pygui.moveTo(x + self.region.width / 15, y + self.region.height / 4)
         for i in range(8):
             pygui.mouseDown()
             pygui.mouseUp()
+        pygui.moveTo(x, y)
+        pygui.mouseDown()
+        pygui.mouseUp()
+        self.kobes = 8
 
     def supply_orange(self):
         x = self.region.left + 0.15 * self.region.width
