@@ -17,7 +17,7 @@ class console:
     color_dkorange = (180, 150, 60)
     font = pg.font.SysFont("SimHei", 48)
     # font_l = pg.font.Font('D:\\tech\python\\game\\shaweima\\font\\ZhouZiSongTi7000Zi-2.otf', 40)
-    titles = ['橙汁', '可乐', '削土豆', '烤架1', '双刃刀', '配料1', '石榴糖浆1', '克比']
+    titles = ['橙汁', '可乐', '削土豆', '烤架1', '薯条机1', '双刃刀', '配料1', '石榴糖浆1', '克比', '小偷', '培训']
 
     def __init__(self):
         self.win = pg.display.set_mode((800, 600))
@@ -61,6 +61,10 @@ class Actions:
         self.add_sauce1 = self.path + 'add sauce1.png'
         self.end_sir = self.path + 'end sir.png'
         self.kobe = self.path + 'kobe.png'
+        self.thief = self.path + 'thief.png'
+        self.orange_juice = self.path + 'orangejuice.png'
+        self.finda = self.path + 'finda.png'
+        self.cola = self.path + 'cola.png'
         self.items = dict()
         self.items['sir'] = self.sir
         self.items['cucumber'] = self.cucumber
@@ -69,7 +73,12 @@ class Actions:
         self.items['add sauce1'] = self.add_sauce1
         self.items['end sir'] = self.end_sir
         self.items['kobe'] = self.kobe
+        self.items['thief'] = self.thief
+        self.items['orange_juice'] = self.orange_juice
+        self.items['finda'] = self.finda
+        self.items['cola'] = self.cola
         self.kobes = 0
+        self.orange_juice = 0
         self.tasks = []
         self.shawarma_on_oven = 0
         self.c = console()
@@ -92,24 +101,19 @@ class Actions:
                 print('More chips!')
                 self.cut_potatoes()
             elif kb.is_pressed('o') and self.c.button_info['橙汁']:
-                x = self.region.left + 0.15 * self.region.width
-                y = self.region.top + 0.5 * self.region.height
+                self.give_orange()
 
-                pygui.moveTo(x, y)
-                pygui.mouseDown()
-                pygui.mouseUp()
-
-                time.sleep(0.7)
-                self.supply_orange()
-                pygui.moveTo(x, y)
-                pygui.mouseDown()
-                pygui.mouseUp()
             elif kb.is_pressed('k') and self.c.button_info['克比']:
                 self.give_kobe()
 
             elif kb.is_pressed(']') and self.c.button_info['可乐']:
+                self.supply_cola()
 
-                self.cola()
+            elif kb.is_pressed('t') and self.c.button_info['小偷']:
+                self.attack_thief()
+
+            elif kb.is_pressed('g') and self.c.button_info['可乐']:
+                self.give_soda()
 
             elif kb.is_pressed('m'):
                 print('CHACHIN')
@@ -136,6 +140,8 @@ class Actions:
             self.finish_task()
 
 
+
+
     def finish_task(self):
         for i, (t, interval, act, arg) in enumerate(self.tasks):
             if (datetime.datetime.now() - t).seconds >= interval:
@@ -155,13 +161,12 @@ class Actions:
         pygui.mouseDown()
         pygui.mouseUp()
 
+        if self.c.button_info['培训']:
+            self.kobes = 8
+            self.orange_juice = 4
+            return
+
         time.sleep(0.7)
-
-        if self.c.button_info['橙汁']:
-            self.supply_orange()
-
-        # if self.c.button_info['克比']:
-        #     self.supply_kobe()
 
         pygui.moveTo(x + self.region.width / 15, y + self.region.height/80)
 
@@ -179,6 +184,7 @@ class Actions:
         pygui.mouseDown()
         pygui.mouseUp()
 
+
     def give_kobe(self):
         item = self.items['kobe']
 
@@ -192,10 +198,75 @@ class Actions:
                 y = self.region.top + 0.6 * self.region.height
                 pygui.moveTo(x, y)
                 pygui.mouseDown()
-                pygui.moveTo(region.x, region.y, duration=0.3)
+                pygui.moveTo(region.x, region.y, duration=0.15)
                 pygui.mouseUp()
                 self.kobes -= 1
                 pygui.moveTo(self.region.left + 0.1 * self.region.width, self.region.top + 0.1 * self.region.height)
+        except:
+            return
+
+    def give_soda(self):
+        cola = self.items['cola']
+        finda = self.items['finda']
+        x_cola = self.region.left + 0.67 * self.region.width
+        y_cola = self.region.top + 0.6 * self.region.height
+        try:
+            region = pygui.locateCenterOnScreen(finda, grayscale=False, confidence=0.96)
+            pygui.moveTo(x_cola, y_cola)
+            pygui.mouseDown()
+            pygui.moveTo(region.x, region.y,duration=0.15)
+            pygui.mouseUp()
+
+        except:
+            pass
+
+        try:
+            region = pygui.locateCenterOnScreen(cola, grayscale=False, confidence=0.96)
+            pygui.moveTo(x_cola + 0.075 * self.region.width, y_cola)
+            pygui.mouseDown()
+            pygui.moveTo(region.x, region.y, duration=0.15)
+            pygui.mouseUp()
+
+        except:
+            pass
+
+        self.supply_cola()
+        return
+
+    def give_orange(self):
+        item = self.items['orange_juice']
+
+        try:
+            if self.orange_juice <= 0:
+                self.supply_orange()
+                time.sleep(0.3)
+            while self.orange_juice > 0:
+                region = pygui.locateCenterOnScreen(item, grayscale=False, confidence=0.8)
+
+                x = self.region.left + 0.25 * self.region.width
+                y = self.region.top + 0.8 * self.region.height
+
+                pygui.moveTo(x, y)
+                pygui.mouseDown()
+                pygui.moveTo(region.x, region.y, duration=0.15)
+                pygui.mouseUp()
+                self.orange_juice -= 1
+                pygui.moveTo(self.region.left + 0.1 * self.region.width, self.region.top + 0.1 * self.region.height)
+        except:
+            return
+
+
+
+    def attack_thief(self):
+        item = self.items['thief']
+
+        try:
+            while True:
+                region = pygui.locateCenterOnScreen(item, grayscale=False, confidence=0.96)
+                pygui.moveTo(region.x + 0.1 * self.region.width, region.y)
+                for i in range(20):
+                    pygui.mouseDown()
+                    pygui.mouseUp()
         except:
             return
 
@@ -206,29 +277,42 @@ class Actions:
         pygui.moveTo(x, y)
         pygui.mouseDown()
         pygui.mouseUp()
-        time.sleep(0.85)
 
-        pygui.moveTo(x + self.region.width / 15, y + self.region.height / 4)
-        for i in range(8):
+        if not self.c.button_info['培训']:
+
+            time.sleep(0.85)
+
+            pygui.moveTo(x + self.region.width / 15, y + self.region.height / 4)
+            for i in range(8):
+                pygui.mouseDown()
+                pygui.mouseUp()
+            pygui.moveTo(x, y)
             pygui.mouseDown()
             pygui.mouseUp()
-        pygui.moveTo(x, y)
-        pygui.mouseDown()
-        pygui.mouseUp()
         self.kobes = 8
 
     def supply_orange(self):
         x = self.region.left + 0.15 * self.region.width
         y = self.region.top + 0.5 * self.region.height
-        pygui.moveTo(x + self.region.width / 15, y + self.region.height / 7)
 
-        for i in range(4):
+        pygui.moveTo(x, y)
+        pygui.mouseDown()
+        pygui.mouseUp()
+        if not self.c.button_info['培训']:
+
+            time.sleep(0.7)
+
+            pygui.moveTo(x + self.region.width / 15, y + self.region.height / 7)
+            for i in range(4):
+                pygui.mouseDown()
+                pygui.mouseUp()
+            pygui.moveTo(x, y)
             pygui.mouseDown()
             pygui.mouseUp()
+        self.orange_juice = 4
 
 
-
-    def cola(self):
+    def supply_cola(self):
         if self.c.button_info['可乐']:
             x = self.region.left + 0.8 * self.region.width
             y = self.region.top + 0.9 * self.region.height
@@ -255,7 +339,10 @@ class Actions:
             cutTime = 6
         else:
             cutTime = 3
-        friedTime = 15
+        if self.c.button_info['薯条机1']:
+            friedTime = 10
+        else:
+            friedTime = 15
 
         x = self.region.left + 0.9 * self.region.width
         y = self.region.top + 0.6 * self.region.height
@@ -266,15 +353,6 @@ class Actions:
         pygui.mouseUp()
 
         self.tasks.append((datetime.datetime.now(), friedTime, self.fried_potatoes, None))
-        # self.fried_potatoes()
-
-        # if self.start:
-        #     await self.supply_sir()
-        #     await asyncio.sleep(0.5)
-        #     await self.chop_meat()
-        #     await asyncio.sleep(friedTime - 7)
-        #     self.start = False
-        # else:
 
     def fried_potatoes(self):
 
@@ -332,7 +410,7 @@ class Actions:
         if self.c.button_info['石榴糖浆1']:
             pygui.moveTo(self.region.left + 0.15 * self.region.width, y_wrap)
             pygui.mouseDown()
-            pygui.moveTo(x_wrap + 0.2 * self.region.width, y_wrap, duration=0.3)
+            pygui.moveTo(x_wrap + 0.2 * self.region.width, y_wrap, duration=0.15)
             pygui.mouseUp()
             time.sleep(1)
 
@@ -363,7 +441,7 @@ class Actions:
 
         pygui.moveTo(x_wrap + 0.1 * self.region.width, y_wrap)
         pygui.mouseDown()
-        pygui.moveTo(x_wrap + 0.3 * self.region.width, y_wrap + (loc - 1) * 0.075 * self.region.height, duration=0.3)
+        pygui.moveTo(x_wrap + 0.3 * self.region.width, y_wrap + (loc - 1) * 0.075 * self.region.height, duration=0.2)
         pygui.mouseUp()
 
 
