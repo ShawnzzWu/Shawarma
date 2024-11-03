@@ -111,9 +111,26 @@ class Actions:
             elif kb.is_pressed('5'):
                 print('Do shawarma')
                 self.do_shawarma(5)
-            elif kb.is_pressed('w'):
+            elif kb.is_pressed('6'):
                 print('Do shawarma')
                 self.do_shawarma(6)
+            elif kb.is_pressed('7'):
+                print('Do shawarma')
+                self.do_shawarma(7)
+            elif kb.is_pressed('8'):
+                print('Do shawarma')
+                self.do_shawarma(8)
+            elif kb.is_pressed('9'):
+                print('Do shawarma')
+                self.do_shawarma(9)
+            elif kb.is_pressed('0'):
+                print('Do shawarma')
+                self.do_shawarma(0)
+
+
+            elif kb.is_pressed('w'):
+                print('Do shawarma')
+                self.do_shawarma(-1)
 
             elif kb.is_pressed('s'):
                 print('supply! sir')
@@ -255,8 +272,8 @@ class Actions:
                 region = pygui.locateCenterOnScreen(fries_item, grayscale=False, confidence=0.85)
                 print('find cutomer', region)
 
-                area = (2500, 800, 700, 450)
-                # print(area)
+                area = (int(self.region.left + 0.5 * self.region.width), int(self.region.top + 0.5 * self.region.height), 900, 450)
+                print(area)
                 find_fries = pygui.locateCenterOnScreen(self.cooked_fries,region= area, grayscale=False, confidence=0.93)
                 print('find fries', find_fries)
                 pygui.moveTo(find_fries.x, find_fries.y)
@@ -494,15 +511,29 @@ class Actions:
         elif self.c.button_info['配料'] == 2:
             add_t = 1
 
-        for i in range(4):
-            if i == type - 1:
-                continue
-            pygui.moveTo(x_ingred + i * 0.085 * self.region.width, y_ingred)
-            for i in range(add_t):
-                pygui.mouseDown()
-                pygui.mouseUp()
+        if 0 < type < 8 or type == -1:
+            for i in range(4):
+                if i != 0 and (i == type or i == type - 4):
+                    continue
+                pygui.moveTo(x_ingred + i * 0.085 * self.region.width, y_ingred)
+                for i in range(add_t):
+                    pygui.mouseDown()
+                    pygui.mouseUp()
+        else:
+            choices = {8:(1, 2),
+                       9:(1, 3),
+                       0:(2,3)}
 
-        if type != 5:
+            for i in range(4):
+                print(i, type, choices[type])
+                if i in choices[type]:
+                    continue
+                pygui.moveTo(x_ingred + i * 0.085 * self.region.width, y_ingred)
+                for i in range(add_t):
+                    pygui.mouseDown()
+                    pygui.mouseUp()
+
+        if type not in (4,5,6,7):
             if self.c.button_info['石榴糖浆'] == 1:
                 pygui.moveTo(self.region.left + 0.15 * self.region.width, y_wrap)
                 pygui.mouseDown()
