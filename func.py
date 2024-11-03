@@ -18,9 +18,10 @@ class console:
     colors = [color_black, color_maize, color_lblue, color_dkorange]
     font = pg.font.SysFont("SimHei", 48)
     # font_l = pg.font.Font('D:\\tech\python\\game\\shaweima\\font\\ZhouZiSongTi7000Zi-2.otf', 40)
-    titles = ['橙汁', '可乐', '削土豆', '烤架', '薯条机', '双刃刀', '配料', '石榴糖浆', '克比', '小偷', '培训']
+    titles = ['橙汁', '可乐', '削土豆', '烤架', '薯条机', '双刃刀', '配料', '石榴糖浆', '克比', '小偷', '培训', '法薯']
     tools_lv = {'橙汁': 2, '可乐':3, '削土豆':3, '烤架':4, '薯条机':3,
-                '双刃刀':3, '配料':3, '石榴糖浆':3, '克比':2, '小偷':2, '培训':2}
+                '双刃刀':3, '配料':3, '石榴糖浆':3, '克比':2, '小偷':2,
+                '培训':2, '法薯': 3}
 
     def __init__(self):
         self.win = pg.display.set_mode((800, 600))
@@ -68,6 +69,8 @@ class Actions:
         self.orange_juice = self.path + 'orangejuice.png'
         self.finda = self.path + 'finda.png'
         self.cola = self.path + 'cola.png'
+        self.french_fries = self.path + 'frenchfries.png'
+        self.cooked_fries = self.path + 'cooked fries.png'
         self.items = dict()
         self.items['sir'] = self.sir
         self.items['cucumber'] = self.cucumber
@@ -80,8 +83,10 @@ class Actions:
         self.items['orange_juice'] = self.orange_juice
         self.items['finda'] = self.finda
         self.items['cola'] = self.cola
-        self.kobes = 0
-        self.orange_juice = 0
+        self.items['french fries'] = self.french_fries
+        self.num_kobes = 0
+        self.num_orange_juice = 0
+        self.num_french_fries = 0
         self.tasks = []
         self.shawarma_on_oven = 0
         self.c = console()
@@ -103,6 +108,11 @@ class Actions:
             elif kb.is_pressed('f'):
                 print('More chips!')
                 self.cut_potatoes()
+            elif kb.is_pressed('r'):
+                self.num_french_fries = 0
+                self.num_kobes = 0
+                self.num_orange_juice = 0
+
             elif kb.is_pressed('o') and self.c.button_info['橙汁']:
                 self.give_orange()
 
@@ -121,8 +131,14 @@ class Actions:
             elif kb.is_pressed('m'):
                 print('CHACHIN')
                 self.cash_in()
+
+            elif kb.is_pressed('/') and self.c.button_info['法薯']:
+                print('French Fries!')
+                self.give_french_fries()
+
             elif kb.is_pressed('esc'):
                 break
+
 
             for event in pg.event.get():
                 if event.type == pg.MOUSEBUTTONUP:
@@ -162,8 +178,8 @@ class Actions:
         pygui.mouseUp()
 
         if self.c.button_info['培训']:
-            self.kobes = 8
-            self.orange_juice = 4
+            self.num_kobes = 8
+            self.num_orange_juice = 4
             return
 
         time.sleep(0.7)
@@ -184,14 +200,57 @@ class Actions:
         pygui.mouseDown()
         pygui.mouseUp()
 
+    def suppply_french_fries(self):
+
+        x = self.region.left + 0.8 * self.region.width
+        y = self.region.top + 0.9 * self.region.height
+
+        pygui.moveTo(x, y)
+        for i in range(3):
+            pygui.mouseDown()
+            pygui.mouseUp()
+        time.sleep(1)
+        y -= 0.1 * self.region.height
+        pygui.moveTo(x, y)
+        for i in range(3):
+            pygui.moveTo(x + i * 0.03 * self.region.width, y)
+            pygui.mouseDown()
+            pygui.moveTo(self.region.left + 0.5 * self.region.width, self.region.top + 0.65 * self.region.height, duration=0.2)
+            pygui.mouseUp()
+        self.num_french_fries = 3
+
+    def give_french_fries(self):
+        fries_item = self.items['french fries']
+
+        try:
+            if self.num_french_fries <= 0:
+                self.suppply_french_fries()
+
+            while self.num_french_fries > 0:
+
+                region = pygui.locateCenterOnScreen(fries_item, grayscale=False, confidence=0.85)
+                print('find cutomer', region)
+
+                area = (2500, 800, 700, 450)
+                # print(area)
+                find_fries = pygui.locateCenterOnScreen(self.cooked_fries,region= area, grayscale=False, confidence=0.93)
+                print('find fries', find_fries)
+                pygui.moveTo(find_fries.x, find_fries.y)
+                pygui.mouseDown()
+                pygui.moveTo(region.x, region.y, duration=0.15)
+                pygui.mouseUp()
+                self.num_french_fries -= 1
+        except:
+            pass
+
 
     def give_kobe(self):
         item = self.items['kobe']
 
         try:
-            if self.kobes <= 0:
+            if self.num_kobes <= 0:
                 self.supply_kobe()
-            while self.kobes > 0:
+            while self.num_kobes > 0:
                 region = pygui.locateCenterOnScreen(item, grayscale=False, confidence=0.96)
 
                 x = self.region.left + 0.6 * self.region.width
@@ -200,7 +259,7 @@ class Actions:
                 pygui.mouseDown()
                 pygui.moveTo(region.x, region.y, duration=0.15)
                 pygui.mouseUp()
-                self.kobes -= 1
+                self.num_kobes -= 1
                 pygui.moveTo(self.region.left + 0.1 * self.region.width, self.region.top + 0.1 * self.region.height)
         except:
             return
@@ -211,7 +270,7 @@ class Actions:
         x_cola = self.region.left + 0.67 * self.region.width
         y_cola = self.region.top + 0.6 * self.region.height
         try:
-            region = pygui.locateCenterOnScreen(finda, grayscale=False, confidence=0.96)
+            region = pygui.locateCenterOnScreen(finda, grayscale=False, confidence=0.95)
             pygui.moveTo(x_cola, y_cola)
             pygui.mouseDown()
             pygui.moveTo(region.x, region.y,duration=0.15)
@@ -221,7 +280,7 @@ class Actions:
             pass
 
         try:
-            region = pygui.locateCenterOnScreen(cola, grayscale=False, confidence=0.96)
+            region = pygui.locateCenterOnScreen(cola, grayscale=False, confidence=0.95)
             pygui.moveTo(x_cola + 0.075 * self.region.width, y_cola)
             pygui.mouseDown()
             pygui.moveTo(region.x, region.y, duration=0.15)
@@ -237,10 +296,10 @@ class Actions:
         item = self.items['orange_juice']
 
         try:
-            if self.orange_juice <= 0:
+            if self.num_orange_juice <= 0:
                 self.supply_orange()
                 time.sleep(0.3)
-            while self.orange_juice > 0:
+            while self.num_orange_juice > 0:
                 region = pygui.locateCenterOnScreen(item, grayscale=False, confidence=0.8)
 
                 x = self.region.left + 0.25 * self.region.width
@@ -250,7 +309,7 @@ class Actions:
                 pygui.mouseDown()
                 pygui.moveTo(region.x, region.y, duration=0.15)
                 pygui.mouseUp()
-                self.orange_juice -= 1
+                self.num_orange_juice -= 1
                 pygui.moveTo(self.region.left + 0.1 * self.region.width, self.region.top + 0.1 * self.region.height)
         except:
             return
@@ -289,7 +348,7 @@ class Actions:
             pygui.moveTo(x, y)
             pygui.mouseDown()
             pygui.mouseUp()
-        self.kobes = 8
+        self.num_kobes = 8
 
     def supply_orange(self):
         x = self.region.left + 0.15 * self.region.width
@@ -309,12 +368,12 @@ class Actions:
             pygui.moveTo(x, y)
             pygui.mouseDown()
             pygui.mouseUp()
-        self.orange_juice = 4
+        self.num_orange_juice = 4
 
 
     def supply_cola(self):
         if self.c.button_info['可乐'] > 0:
-            x = self.region.left + 0.8 * self.region.width
+            x = self.region.left + 0.85 * self.region.width
             y = self.region.top + 0.9 * self.region.height
 
             pygui.moveTo(x, y)
@@ -334,7 +393,8 @@ class Actions:
             pygui.mouseUp()
 
     def cut_potatoes(self):
-
+        if self.c.button_info['削土豆'] == 2:
+            return
         if self.c.button_info['削土豆'] == 0:
             cutTime = 6
         elif self.c.button_info['削土豆'] == 1:
@@ -366,9 +426,10 @@ class Actions:
         pygui.mouseUp()
 
     def chop_meat(self):
+            if self.c.button_info['双刃刀'] == 2:
+                return
             x = self.region.left + 0.2 * self.region.width
             y = self.region.top + 0.65 * self.region.height
-
             pygui.moveTo(x, y)
             pygui.mouseDown()
 
