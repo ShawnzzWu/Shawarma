@@ -564,7 +564,8 @@ class Actions:
             self.tasks.append((datetime.datetime.now(), 2.3, self.wrap_shawarma, self.shawarma_on_oven))
             self.shawarma_on_oven += 1
         elif self.c.button_info['烤架'] == 0:
-            self.wrap_shawarma()
+            self.wrap_shawarma(self.shawarma_on_oven)
+            self.shawarma_on_oven += 1
 
 
 
@@ -574,13 +575,13 @@ class Actions:
         y_wrap = self.region.top + 0.77 * self.region.height
 
         if 0 < self.c.button_info['烤架'] < 3:
-            pygui.moveTo(x_wrap + 0.4 * self.region.width, y_wrap + loc * 0.075 * self.region.height)
+            pygui.moveTo(x_wrap + 0.4 * self.region.width, y_wrap + loc * 0.065 * self.region.height)
             pygui.mouseDown()
-            pygui.moveTo(x_wrap + 0.3 * self.region.width, y_wrap + loc * 0.075 * self.region.height)
+            pygui.moveTo(x_wrap + 0.3 * self.region.width, y_wrap + loc * 0.065 * self.region.height)
             pygui.mouseUp()
             self.shawarma_on_oven -= 1
             time.sleep(0.5)
-        elif self.c.button_info['烤架'] == 3:
+        else:
             self.shawarma_on_oven -= 1
             time.sleep(0.5)
 
@@ -588,7 +589,7 @@ class Actions:
             pygui.moveTo(x_wrap + 0.1 * self.region.width, y_wrap)
             pygui.mouseDown()
             if self.c.button_info['包装'] < 1:
-                pygui.moveTo(x_wrap + 0.3 * self.region.width, y_wrap + loc * 0.075 * self.region.height, duration=0.25)
+                pygui.moveTo(x_wrap + 0.3 * self.region.width, y_wrap + loc * 0.065 * self.region.height, duration=0.25)
 
             pygui.mouseUp()
 
