@@ -272,9 +272,9 @@ class Actions:
                 region = pygui.locateCenterOnScreen(fries_item, grayscale=False, confidence=0.85)
                 print('find cutomer', region)
 
-                area = (int(self.region.left + 0.5 * self.region.width), int(self.region.top + 0.5 * self.region.height), 900, 450)
+                area = (int(self.region.left + 0.7 * self.region.width), int(self.region.top + 0.7 * self.region.height), 900, 450)
                 print(area)
-                find_fries = pygui.locateCenterOnScreen(self.cooked_fries,region= area, grayscale=False, confidence=0.93)
+                find_fries = pygui.locateCenterOnScreen(self.cooked_fries,region= area, grayscale=False, confidence=0.95)
                 print('find fries', find_fries)
                 pygui.moveTo(find_fries.x, find_fries.y)
                 pygui.mouseDown()
@@ -344,7 +344,7 @@ class Actions:
                 self.supply_orange()
                 time.sleep(0.3)
             while self.num_orange_juice > 0:
-                region = pygui.locateCenterOnScreen(item, grayscale=False, confidence=0.8)
+                region = pygui.locateCenterOnScreen(item, grayscale=False, confidence=0.83)
 
                 x = self.region.left + 0.25 * self.region.width
                 y = self.region.top + 0.8 * self.region.height
