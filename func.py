@@ -269,18 +269,19 @@ class Actions:
 
             while self.num_french_fries > 0:
 
-                region = pygui.locateCenterOnScreen(fries_item, grayscale=False, confidence=0.85)
-                print('find cutomer', region)
+                customer_region = pygui.locateCenterOnScreen(fries_item, grayscale=False, confidence=0.85)
+                print('find cutomer', customer_region)
 
-                area = (int(self.region.left + 0.7 * self.region.width), int(self.region.top + 0.7 * self.region.height), 900, 450)
-                print(area)
+                area = (int(self.region.left + 0.7 * self.region.width), int(self.region.top + 0.7 * self.region.height),
+                        int(0.3 * self.region.width), int(0.3 * self.region.height))
+                # print(area)
                 find_fries = pygui.locateCenterOnScreen(self.cooked_fries,region= area, grayscale=False, confidence=0.95)
                 print('find fries', find_fries)
                 pygui.moveTo(find_fries.x, find_fries.y)
                 pygui.mouseDown()
-                pygui.moveTo(region.x, region.y, duration=0.15)
+                pygui.moveTo(customer_region.x, customer_region.y, duration=0.12)
                 pygui.mouseUp()
-                pygui.moveTo(region.x, region.y - 0.3 * self.region.height)
+                pygui.moveTo(customer_region.x, customer_region.y - 0.3 * self.region.height)
                 self.num_french_fries -= 1
         except:
             pass
@@ -293,16 +294,19 @@ class Actions:
             if self.num_kobes <= 0:
                 self.supply_kobe()
             while self.num_kobes > 0:
-                region = pygui.locateCenterOnScreen(item, grayscale=False, confidence=0.96)
+                #area定位需要int类型
+                area = (int(self.region.left + 0.2 * self.region.width), int(self.region.top),
+                        int(0.8 * self.region.width), int(0.5 * self.region.height))
+                customer_region = pygui.locateCenterOnScreen(item, region=area, grayscale=False, confidence=0.96)
 
                 x = self.region.left + 0.6 * self.region.width
                 y = self.region.top + 0.6 * self.region.height
                 pygui.moveTo(x, y)
                 pygui.mouseDown()
-                pygui.moveTo(region.x, region.y, duration=0.15)
+                pygui.moveTo(customer_region.x, customer_region.y, duration=0.12)
                 pygui.mouseUp()
                 self.num_kobes -= 1
-                pygui.moveTo(region.x, region.y - 0.3 * self.region.height)
+                pygui.moveTo(customer_region.x, customer_region.y - 0.3 * self.region.height)
         except:
             return
 
@@ -311,24 +315,26 @@ class Actions:
         finda = self.items['finda']
         x_cola = self.region.left + 0.67 * self.region.width
         y_cola = self.region.top + 0.6 * self.region.height
+        area = (int(self.region.left + 0.2 * self.region.width), int(self.region.top),
+                int(0.8 * self.region.width), int(0.5 * self.region.height))
         try:
-            region = pygui.locateCenterOnScreen(finda, grayscale=False, confidence=0.95)
+            finda_cust_region = pygui.locateCenterOnScreen(finda, region=area, grayscale=False, confidence=0.95)
             pygui.moveTo(x_cola, y_cola)
             pygui.mouseDown()
-            pygui.moveTo(region.x, region.y,duration=0.15)
+            pygui.moveTo(finda_cust_region.x, finda_cust_region.y,duration=0.12)
             pygui.mouseUp()
-            pygui.moveTo(region.x, region.y - 0.3 * self.region.height)
-
+            pygui.moveTo(finda_cust_region.x, finda_cust_region.y - 0.3 * self.region.height)
+            time.sleep(0.05)
         except:
             pass
 
         try:
-            region = pygui.locateCenterOnScreen(cola, grayscale=False, confidence=0.95)
+            cola_cust_region = pygui.locateCenterOnScreen(cola, region=area, grayscale=False, confidence=0.95)
             pygui.moveTo(x_cola + 0.075 * self.region.width, y_cola)
             pygui.mouseDown()
-            pygui.moveTo(region.x, region.y, duration=0.15)
+            pygui.moveTo(cola_cust_region.x, cola_cust_region.y, duration=0.12)
             pygui.mouseUp()
-            pygui.moveTo(region.x, region.y - 0.3 * self.region.height)
+            pygui.moveTo(cola_cust_region.x, cola_cust_region.y - 0.3 * self.region.height)
 
         except:
             pass
@@ -338,23 +344,24 @@ class Actions:
 
     def give_orange(self):
         item = self.items['orange_juice']
-
+        area = (int(self.region.left + 0.2 * self.region.width), int(self.region.top),
+                int(0.8 * self.region.width), int(0.5 * self.region.height))
         try:
             if self.num_orange_juice <= 0:
                 self.supply_orange()
                 time.sleep(0.3)
             while self.num_orange_juice > 0:
-                region = pygui.locateCenterOnScreen(item, grayscale=False, confidence=0.83)
+                customer_region = pygui.locateCenterOnScreen(item, region=area, grayscale=False, confidence=0.83)
 
                 x = self.region.left + 0.25 * self.region.width
                 y = self.region.top + 0.8 * self.region.height
 
                 pygui.moveTo(x, y)
                 pygui.mouseDown()
-                pygui.moveTo(region.x, region.y, duration=0.15)
+                pygui.moveTo(customer_region.x, customer_region.y, duration=0.12)
                 pygui.mouseUp()
                 self.num_orange_juice -= 1
-                pygui.moveTo(region.x, region.y - 0.3 * self.region.height)
+                pygui.moveTo(customer_region.x, customer_region.y - 0.3 * self.region.height)
         except:
             return
 
@@ -537,7 +544,7 @@ class Actions:
             if self.c.button_info['石榴糖浆'] == 1:
                 pygui.moveTo(self.region.left + 0.15 * self.region.width, y_wrap)
                 pygui.mouseDown()
-                pygui.moveTo(x_wrap + 0.2 * self.region.width, y_wrap, duration=0.15)
+                pygui.moveTo(x_wrap + 0.2 * self.region.width, y_wrap, duration=0.1)
                 pygui.mouseUp()
                 time.sleep(1)
             elif self.c.button_info['石榴糖浆'] == 2:
